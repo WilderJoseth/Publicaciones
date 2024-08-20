@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Chatbot Integration</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-6 chatbot-container">
+            <iframe src="https://webchat.botframework.com/embed/ai-language-20240723-bot?s={{ key_access }}" style="min-width: 400px; width: 100%; min-height: 500px;"></iframe>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-6 text-center">
+            <a href="/" class="btn btn-success" id="linkButton">Go to Index</a>
+        </div>
+      </div>
+</div>
+{% endblock %}

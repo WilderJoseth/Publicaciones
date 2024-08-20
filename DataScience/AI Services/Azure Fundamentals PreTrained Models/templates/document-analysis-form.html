@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Document Analysis</h1>
+    <form id="uploadForm" novalidate>
+        <div class="form-group">
+            <label for="imageUpload">Upload Image:</label>
+            <input type="file" class="form-control-file" id="imageUpload" accept="image/*" required>
+            <div class="invalid-feedback">Please upload an image.</div>
+        </div>
+        <div class="form-group" id="radioGroup">
+            <label>Options:</label><br>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="read" id="option1" required>
+                <label class="form-check-label" for="option1">Read</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="layout" id="option2">
+                <label class="form-check-label" for="option2">Layout</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="invoice" id="option3">
+                <label class="form-check-label" for="option3">Invoice</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="receipt" id="option4">
+                <label class="form-check-label" for="option4">Receipt</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="identity" id="option5">
+                <label class="form-check-label" for="option5">Identity</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="mortgage1003" id="option6">
+                <label class="form-check-label" for="option6">US mortgage 1003 form</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="mortgage1008" id="option7">
+                <label class="form-check-label" for="option7">US mortgage 1008 form</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="mortgagedisclosure" id="option8">
+                <label class="form-check-label" for="option8">US mortgage disclosure form</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="health" id="option9">
+                <label class="form-check-label" for="option9">Health insurance card</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="options" value="creditcard" id="option10">
+                <label class="form-check-label" for="option10">Credit card model</label>
+            </div>
+            <div class="invalid-feedback" id="radioFeedback">Please select one option.</div>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
+            <a href="/" class="btn btn-success" id="linkButton">Go to Index</a>
+        </div>
+    </form>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Image from Server:</h3>
+            <div id="serverImage"></div>
+        </div>
+        <div class="col-md-6">
+            <h3>List:</h3>
+            <ul id="optionsList" class="list-group"></ul>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const fileInput = document.getElementById('imageUpload');
+        const radios = document.querySelectorAll('#radioGroup .form-check-input');
+        let isValid = true;
+
+        if (fileInput.files.length === 0) {
+            fileInput.classList.add('is-invalid');
+            isValid = false;
+        } 
+        else {
+            fileInput.classList.remove('is-invalid');
+        }
+
+        let radioSelected = false;
+        radios.forEach(radio => {
+            if (radio.checked) {
+                radioSelected = true;
+            }
+        });
+
+        if (!radioSelected) {
+            document.getElementById('radioFeedback').style.display = 'block';
+            isValid = false;
+        } 
+        else {
+            document.getElementById('radioFeedback').style.display = 'none';
+        }
+
+        if (isValid) {
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            const selectedOption = Array.from(radios).find(radio => radio.checked)?.value;
+
+            try {
+                const response = await fetch('/document-analysis', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+                document.getElementById('serverImage').innerHTML = `<img src="${result.imagePath}" class="img-fluid">`;
+                const optionsList = document.getElementById('optionsList');
+                optionsList.innerHTML = '';
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.textContent = selectedOption;
+                optionsList.appendChild(listItem);
+            } 
+            catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    });
+
+    document.getElementById('clearButton').addEventListener('click', function() {
+        document.getElementById('uploadForm').reset();
+        document.getElementById('imageUpload').classList.remove('is-invalid');
+        document.getElementById('radioFeedback').style.display = 'none';
+        document.getElementById('serverImage').innerHTML = '';
+        document.getElementById('optionsList').innerHTML = '';
+    });
+
+    document.getElementById('indexButton').addEventListener('click', function() {
+        window.location.href = 'index.html';
+    });
+
+    document.querySelectorAll('#radioGroup .form-check-input').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.getElementById('radioFeedback').style.display = 'none';
+        });
+    });
+
+</script>
+{% endblock %}

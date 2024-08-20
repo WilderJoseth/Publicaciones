@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Upload Image and Select Checkboxes</h1>
+    <form id="uploadForm" enctype="multipart/form-data" class="mb-4">
+        <div class="form-group">
+            <label for="image">Select Image</label>
+            <input type="file" class="form-control-file" id="image" name="image" accept="image/*" required>
+            <div class="invalid-feedback">Please select an image.</div>
+        </div>
+        <div class="form-group">
+            <label>Select Options</label><br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="occlusion" name="options[]" value="occlusion">
+                <label class="form-check-label" for="occlusion">Occlusion</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="blur" name="options[]" value="blur">
+                <label class="form-check-label" for="blur">Blur</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="glasses" name="options[]" value="glasses">
+                <label class="form-check-label" for="glasses">Glasses</label>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+        <a href="/" class="btn btn-info">Go to Index</a>
+    </form>
+
+    <!-- Modal for loading overlay -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Processed Image</h2>
+            <img id="resultImage" src="" alt="Processed Image" class="img-fluid" style="display:none;">
+        </div>
+        <div class="col-md-6">
+            <h2>Face Information</h2>
+            <ul id="imageInfo" class="list-group"></ul>
+            <ul id="imageInfoList" class="list-group"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // When the form is submitted
+    document.getElementById('uploadForm').onsubmit = async function(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Show loading modal
+        $('#loadingModal').modal('show');
+
+        // Validate if an image is selected
+        let imageInput = document.getElementById('image');
+        if (imageInput.files.length === 0) {
+            imageInput.classList.add('is-invalid');
+            $('#loadingModal').modal('hide'); // Hide loading modal
+            return;
+        } else {
+            imageInput.classList.remove('is-invalid');
+        }
+
+        // Create a new FormData object to hold the form data
+        let formData = new FormData();
+        // Append the selected image file to the FormData object
+        formData.append('image', imageInput.files[0]);
+
+        // Append the selected checkboxes values to the FormData object
+        let checkboxes = document.querySelectorAll('input[name="options[]"]:checked');
+        checkboxes.forEach((checkbox) => {
+            formData.append('options[]', checkbox.value);
+        });
+
+        // Send the form data to the backend using a POST request
+        let response = await fetch('/detect-faces', {
+            method: 'POST',
+            body: formData
+        });
+
+        // Hide loading modal regardless of response status
+        $('#loadingModal').modal('hide');
+
+        // If the response is OK (status 200)
+        if (response.ok) {
+            // Parse the JSON response
+            let jsonResponse = await response.json();
+
+            // Create a Blob from the hex-encoded image data
+            let binary = new Uint8Array(jsonResponse.image_data.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            let blob = new Blob([binary], { type: 'image/jpeg' });
+
+            // Create a URL for the Blob
+            let url = URL.createObjectURL(blob);
+
+            // Get the result image element
+            let resultImage = document.getElementById('resultImage');
+            // Set the source of the result image to the Blob URL
+            resultImage.src = url;
+            // Make the result image visible
+            resultImage.style.display = 'block';
+
+            // Display image information as a list
+            let imageInfo = document.getElementById('imageInfo');
+            imageInfo.innerHTML = '';  // Clear existing list items
+            
+            // Get image summary description
+            let imageTextItem = document.createElement('li');
+            imageTextItem.classList.add('list-group-item');
+            imageTextItem.textContent = jsonResponse.text_result;
+            imageInfo.appendChild(imageTextItem);
+
+            // Display image information as a list
+            let imageInfoList = document.getElementById('imageInfoList');
+            imageInfoList.innerHTML = '';  // Clear existing list items
+
+            // Create list items for the image information
+            jsonResponse.faces.forEach((face) => {
+                let imageTextItem = document.createElement('li');
+                imageTextItem.classList.add('list-group-item');
+                imageTextItem.textContent = "Face id: " + face.id.toString();
+                imageInfoList.appendChild(imageTextItem);
+
+                if (face.occlusion){
+                    let imageTextItem = document.createElement('li');
+                    imageTextItem.classList.add('list-group-item');
+
+                    face.occlusion_features.forEach((f) => {
+                        imageTextItem.textContent = f;
+                        imageInfoList.appendChild(imageTextItem);
+                    })
+                }
+                
+                if (face.blur){
+                    let imageTextItem = document.createElement('li');
+                    imageTextItem.classList.add('list-group-item');
+
+                    face.blur_features.forEach((f) => {
+                        imageTextItem.textContent = f;
+                        imageInfoList.appendChild(imageTextItem);
+                    })
+                }
+                
+                if (face.glasses){
+                    let imageTextItem = document.createElement('li');
+                    imageTextItem.classList.add('list-group-item');
+
+                    imageTextItem.textContent = face.glasses_features;
+                    imageInfoList.appendChild(imageTextItem);
+                }
+
+            });
+        } else {
+            // If there was an error, alert the user
+            alert('Image processing failed.');
+        }
+    };
+
+    // When the reset button is clicked
+    document.getElementById('uploadForm').onreset = function() {
+        // Clear any validation styling on image input
+        document.getElementById('image').classList.remove('is-invalid');
+
+        // Clear all checkboxes
+        let checkboxes = document.querySelectorAll('input[name="options[]"]');
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = false;
+        });
+
+        // Clear the result div
+        document.getElementById('result').innerHTML = '';
+    };
+</script>
+{% endblock %}

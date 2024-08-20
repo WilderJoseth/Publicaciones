@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .title {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .section {
+    margin: 20px 0;
+    text-align: left;
+  }
+  .section-buttons {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .section-buttons .btn {
+    margin: 0 5px;
+  }
+</style>
+<div class="container">
+    <h1 class="title">Microsoft Azure AI Fundamentals</h1>
+    <div class="section">
+      <h3>Computer Vision</h3>
+      <div class="section-buttons">
+        <a href="/image-analysis-form" class="btn btn-primary btn-lg">Image Analysis</a>
+        <a href="/face-recognition-form" class="btn btn-secondary btn-lg">Face Recognition</a>
+      </div>
+    </div>
+    <div class="section">
+      <h3>Natural Language Processing</h3>
+      <div class="section-buttons">
+        <a href="/text-analysis-form" class="btn btn-primary btn-lg">Text Analysis</a>
+        <a href="/question-answering-form" class="btn btn-secondary btn-lg">Question Answering</a>
+        <a href="/language-understanding-form" class="btn btn-success btn-lg">Conversational Language Understanding</a>
+        <a href="/speech-form" class="btn btn-dark btn-lg">AI Speech</a>
+      </div>
+    </div>
+    <div class="section">
+      <h3>Document Intelligence and Knowledge Mining</h3>
+      <div class="section-buttons">
+        <a href="/document-analysis-form" class="btn btn-primary btn-lg">Document Analysis</a>
+      </div>
+    </div>
+    <div class="section">
+      <h3>Generative AI</h3>
+      <div class="section-buttons">
+        <a href="/analyze-image-form" class="btn btn-primary btn-lg">Chat</a>
+      </div>
+    </div>
+</div>
+{% endblock %}
