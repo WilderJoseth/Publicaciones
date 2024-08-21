@@ -116,7 +116,7 @@
             formData.append('option', selectedOption.value);
 
             // Send the form data to the backend using a POST request
-            let response = await fetch('/analyze-image', {
+            let response = await fetch('/image-analysis', {
                 method: 'POST',
                 body: formData
             });

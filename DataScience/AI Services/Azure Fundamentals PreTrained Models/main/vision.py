@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from entities.camera import Camera
 from entities.faceCamera import FaceCamera
 
-def analyzeImage(image_path, action):
+def analyzeImage(image_path, action, image_path_out = ""):
     # Get Configuration Settings
     load_dotenv()
     ai_endpoint = os.getenv("AI_SERVICE_ENDPOINT_CV")
@@ -37,22 +37,22 @@ def analyzeImage(image_path, action):
         result["image_data_output"] = camera.image_data
     elif action == 4:
         unique_name = f"{uuid.uuid4()}.jpg"
-        camera.getObjects(output_file = f"analyzeImage/out/{unique_name}")
+        camera.getObjects(output_file = f"{os.path.join(image_path_out, unique_name)}")
         result["objects"] = camera.objects
         result["image_data_output"] = camera.image_data_output
     elif action == 5:
         unique_name = f"{uuid.uuid4()}.jpg"
-        camera.getPeople(output_file = f"analyzeImage/out/{unique_name}")
+        camera.getPeople(output_file = f"{os.path.join(image_path_out, unique_name)}")
         result["people"] = [camera.people]
         result["image_data_output"] = camera.image_data_output
     elif action == 6:
         unique_name = f"{uuid.uuid4()}.jpg"
-        camera.readText(output_file = f"analyzeImage/out/{unique_name}")
+        camera.readText(output_file = f"{os.path.join(image_path_out, unique_name)}")
         result["text"] = camera.text
         result["image_data_output"] = camera.image_data_output
     return result
 
-def recognizeFace(image_path, options):
+def recognizeFace(image_path, options, image_path_out = ""):
     # Get Configuration Settings
     load_dotenv()
     cog_endpoint = os.getenv("AI_SERVICE_ENDPOINT_FAPI")
@@ -61,7 +61,7 @@ def recognizeFace(image_path, options):
     result = {}
 
     face = FaceCamera(cog_endpoint, cog_key)
-    face.getFaces(image_path, output_file = f"analyzeImage/out/{unique_name}", options = options)
+    face.getFaces(image_path, output_file = f"{os.path.join(image_path_out, unique_name)}", options = options)
 
     result["image_data_output"] = face.image_data_output
     result["summary_description"] = face.summary_description

@@ -78,7 +78,7 @@ def image_analysis():
             image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
 
             # Process the image based on the selected options
-            result = vision.analyzeImage(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), int(option))
+            result = vision.analyzeImage(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), int(option), os.path.join(app.config["UPLOAD_FOLDER"], "out"))
 
             # Get a copy of input image to show in the webpage in case analyze does not get an output image
             image_data = result["image_data"]
@@ -129,8 +129,9 @@ def image_analysis():
             }), 200
         else:
             return jsonify({"error": "No file extension valid"}), 400
-    except:
-        return jsonify({"error": "Internal Server Error"}), 500
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": e}), 500
 
 @app.route("/face-recognition-form", methods = ["GET"])
 def face_recognition_form():
@@ -169,7 +170,7 @@ def face_recognition():
             image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
 
             # Process the image based on the selected options
-            result = vision.recognizeFace(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), options)
+            result = vision.recognizeFace(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), options, os.path.join(app.config["UPLOAD_FOLDER"], "out"))
 
             # Get image copy with faces identified
             image_data = result["image_data_output"]
@@ -192,8 +193,9 @@ def face_recognition():
             }), 200
         else:
             return jsonify({"error": "No file extension valid"}), 400
-    except:
-        return jsonify({"error": "Internal Server Error"}), 500
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": e}), 500
 
 @app.route("/text-analysis-form", methods = ["GET"])
 def text_analysis_form():
@@ -265,8 +267,9 @@ def text_analysis():
             }
 
             return jsonify(response), 200
-    except:
-        return jsonify({"error": "Internal error"}), 500
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"error": e}), 500
 
 @app.route("/question-answering-form", methods = ["GET"])
 def question_answering_form():

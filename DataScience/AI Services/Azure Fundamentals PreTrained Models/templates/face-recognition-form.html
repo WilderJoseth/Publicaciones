@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Upload Image and Select Checkboxes</h1>
+    <h1 class="mb-4">Analyze faces using Azure AI Vision</h1>
     <form id="uploadForm" enctype="multipart/form-data" class="mb-4">
         <div class="form-group">
             <label for="image">Select Image</label>
@@ -96,7 +96,7 @@
             });
 
             // Send the form data to the backend using a POST request
-            let response = await fetch('/detect-faces', {
+            let response = await fetch('/face-recognition', {
                 method: 'POST',
                 body: formData
             });
@@ -202,7 +202,16 @@
         });
 
         // Clear the result div
-        document.getElementById('result').innerHTML = '';
+        // Hide the result image
+        let resultImage = document.getElementById('resultImage');
+        resultImage.style.display = 'none';
+
+        // Clear the image information list
+        let imageInfo = document.getElementById('imageInfo');
+        imageInfo.innerHTML = '';
+
+        let imageInfoList = document.getElementById('imageInfoList');
+        imageInfoList.innerHTML = '';
     };
 </script>
 {% endblock %}
