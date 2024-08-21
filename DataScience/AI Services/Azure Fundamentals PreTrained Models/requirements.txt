@@ -1,2 +1,6 @@
 Flask == 3.0.3
 python-dotenv == 1.0.1
+azure-ai-vision-imageanalysis == 1.0.0b1
+azure-cognitiveservices-vision-face == 0.6.0
+azure-ai-textanalytics == 5.3.0
+opencv-python == 4.10.0.84

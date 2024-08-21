@@ -58,75 +58,79 @@ def image_analysis():
     image_data = None
     text_result = ""
 
-    # Get input image
-    image_file = request.files["image"]
+    try:
 
-    # Get selected options
-    option = int(request.form["option"])
+        # Get input image
+        image_file = request.files["image"]
 
-    # Apply image analysis to valid images
-    if allowed_file(image_file.filename):
-        # Get file extension
-        extension = image_file.filename.rsplit(".", 1)[1].lower()
+        # Get selected options
+        option = int(request.form["option"])
 
-        # Create new file name
-        unique_name = f"{uuid.uuid4()}.{extension}"
+        # Apply image analysis to valid images
+        if allowed_file(image_file.filename):
+            # Get file extension
+            extension = image_file.filename.rsplit(".", 1)[1].lower()
 
-        # Create an image copy
-        image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+            # Create new file name
+            unique_name = f"{uuid.uuid4()}.{extension}"
 
-        # Process the image based on the selected options
-        result = vision.analyzeImage(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), int(option))
+            # Create an image copy
+            image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
 
-        # Get a copy of input image to show in the webpage in case analyze does not get an output image
-        image_data = result["image_data"]
+            # Process the image based on the selected options
+            result = vision.analyzeImage(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), int(option))
 
-        # Process the image based on the selected option
-        if option == 1:
-            # Get captions
-            if result["caption"]:
-                image_data = result["image_data_output"]
-                text_result = result["caption"]
-        elif option == 2:
-            # Get dense caption
-            if result["dense_captions"]:
-                image_data = result["image_data_output"]
-                text_result = result["dense_captions"]
-        elif option == 3:
-            # Get tags
-            if result["tags"]:
-                image_data = result["image_data_output"]
-                text_result = result["tags"]
-        elif option == 4:
-            # Get objects
-            if result["objects"]:
-                image_data = result["image_data_output"]
-                text_result = result["objects"]
-        elif option == 5:
-            # Get people
-            if result["people"]:
-                image_data = result["image_data_output"]
-                text_result = result["people"]
-        elif option == 6:
-            # Get OCR
-            if result["text"]:
-                image_data = result["image_data_output"]
-                text_result = result["text"]
+            # Get a copy of input image to show in the webpage in case analyze does not get an output image
+            image_data = result["image_data"]
+
+            # Process the image based on the selected option
+            if option == 1:
+                # Get captions
+                if result["caption"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["caption"]
+            elif option == 2:
+                # Get dense caption
+                if result["dense_captions"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["dense_captions"]
+            elif option == 3:
+                # Get tags
+                if result["tags"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["tags"]
+            elif option == 4:
+                # Get objects
+                if result["objects"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["objects"]
+            elif option == 5:
+                # Get people
+                if result["people"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["people"]
+            elif option == 6:
+                # Get OCR
+                if result["text"]:
+                    image_data = result["image_data_output"]
+                    text_result = result["text"]
+            else:
+                # No valid option
+                return jsonify({"error": "Invalid option"}), 400
+
+            # Save the processed image to a BytesIO object in order to be shown in the webpage
+            img_io = io.BytesIO(image_data)
+            img_io.seek(0)
+
+            # Return the JSON object and image in the response
+            return jsonify({
+                "text_result": text_result,
+                "image_data": img_io.getvalue().hex()
+            }), 200
         else:
-            # No valid option
-            return jsonify({"error": "Invalid option"}), 400
-
-        # Save the processed image to a BytesIO object in order to be shown in the webpage
-        img_io = io.BytesIO(image_data)
-        img_io.seek(0)
-
-        # Return the JSON object and image in the response
-        return jsonify({
-            "text_result": text_result,
-            "image_data": img_io.getvalue().hex()
-        })
-    else:
-        return jsonify({"error": "No file extension valid"}), 400
+            return jsonify({"error": "No file extension valid"}), 400
+    except:
+        return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route("/face-recognition-form", methods = ["GET"])
 def face_recognition_form():
@@ -145,47 +149,51 @@ def face_recognition():
     text_result = ""
     faces = []
 
-    # Get input image
-    image_file = request.files["image"]
+    try:
 
-    # Get selected options
-    options = request.form.getlist("options[]")
-    
-    # Apply face detection to valid images
-    if allowed_file(image_file.filename):
-        # Get file extension
-        extension = image_file.filename.rsplit(".", 1)[1].lower()
+        # Get input image
+        image_file = request.files["image"]
 
-        # Create new file name
-        unique_name = f"{uuid.uuid4()}.{extension}"
+        # Get selected options
+        options = request.form.getlist("options[]")
+        
+        # Apply face detection to valid images
+        if allowed_file(image_file.filename):
+            # Get file extension
+            extension = image_file.filename.rsplit(".", 1)[1].lower()
 
-        # Create an image copy
-        image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+            # Create new file name
+            unique_name = f"{uuid.uuid4()}.{extension}"
 
-        # Process the image based on the selected options
-        result = vision.recognizeFace(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), options)
+            # Create an image copy
+            image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
 
-        # Get image copy with faces identified
-        image_data = result["image_data_output"]
+            # Process the image based on the selected options
+            result = vision.recognizeFace(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), options)
 
-        # Get face characteristics summary
-        text_result = result["summary_description"]
+            # Get image copy with faces identified
+            image_data = result["image_data_output"]
 
-        # Get face characteristics
-        faces = result["faces"]
+            # Get face characteristics summary
+            text_result = result["summary_description"]
 
-        # Save the processed image to a BytesIO object in order to be shown in the webpage
-        img_io = io.BytesIO(image_data)
-        img_io.seek(0)
+            # Get face characteristics
+            faces = result["faces"]
 
-        # Return the JSON object and image in the response
-        return jsonify({
-            "text_result": text_result,
-            "image_data": img_io.getvalue().hex(),
-            "faces": faces
-        })
-    else:
-        return jsonify({"error": "No file extension valid"}), 400
+            # Save the processed image to a BytesIO object in order to be shown in the webpage
+            img_io = io.BytesIO(image_data)
+            img_io.seek(0)
+
+            # Return the JSON object and image in the response
+            return jsonify({
+                "text_result": text_result,
+                "image_data": img_io.getvalue().hex(),
+                "faces": faces
+            }), 200
+        else:
+            return jsonify({"error": "No file extension valid"}), 400
+    except:
+        return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route("/text-analysis-form", methods = ["GET"])
 def text_analysis_form():
@@ -193,33 +201,58 @@ def text_analysis_form():
 
 @app.route("/text-analysis", methods = ["POST"])
 def text_analysis():
+    try:
 
-    # Get selected options
-    option = request.form["option"]
+        # Get selected options
+        option = request.form["option"]
 
-    print(f"Option selected: {option}")
+        print(f"Option selected: {option}")
 
-    text_result = ""
+        text_result = ""
 
-    if option == "File":
-        if "file" not in request.files:
-            return jsonify({"error": "No file uploaded"}), 400
+        if option == "File":
+            if "file" not in request.files:
+                return jsonify({"error": "No file uploaded"}), 400
 
-        file = request.files["file"]
+            file = request.files["file"]
 
-        if file.filename == "":
-            return jsonify({"error": "No file uploaded"}), 400
-        
-        if allowed_file(file.filename, False):
-            #filename = secure_filename(file.filename)
+            if file.filename == "":
+                return jsonify({"error": "No file uploaded"}), 400
+            
+            if allowed_file(file.filename, False):
+                #filename = secure_filename(file.filename)
 
-            # Get file extension
-            extension = file.filename.rsplit(".", 1)[1].lower()
+                # Get file extension
+                extension = file.filename.rsplit(".", 1)[1].lower()
 
+                # Create new file name
+                unique_name = f"{uuid.uuid4()}.{extension}"
+
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+
+                text_result = textAI.analyzeText(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+
+                response = {
+                    "Main language": [text_result["language"]],
+                    "Sentiment": text_result["sentiment"],
+                    "Key Phrases": text_result["phrases"],
+                    "Entities": text_result["entities"],
+                    "Entities Link": text_result["entities_link"]
+                }
+
+                return jsonify(response)
+            else:
+                return jsonify({"error": "No file extension valid"}), 400
+        else:
+            text = request.form["text"]
+
+            if len(text.split()) < 4:
+                return jsonify({"error": "Text must contain at least four words"}), 400
+            
             # Create new file name
-            unique_name = f"{uuid.uuid4()}.{extension}"
-
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+            unique_name = f"{uuid.uuid4()}.txt"
+            with open(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), "w", encoding="utf8") as text_file:
+                text_file.write(text)
 
             text_result = textAI.analyzeText(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
 
@@ -231,31 +264,9 @@ def text_analysis():
                 "Entities Link": text_result["entities_link"]
             }
 
-            return jsonify(response)
-        else:
-            return jsonify({"error": "No file extension valid"}), 400
-    else:
-        text = request.form["text"]
-
-        if len(text.split()) < 4:
-            return jsonify({"error": "Text must contain at least four words"}), 400
-        
-        # Create new file name
-        unique_name = f"{uuid.uuid4()}.txt"
-        with open(os.path.join(app.config["UPLOAD_FOLDER"], unique_name), "w", encoding="utf8") as text_file:
-            text_file.write(text)
-
-        text_result = textAI.analyzeText(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
-
-        response = {
-            "Main language": [text_result["language"]],
-            "Sentiment": text_result["sentiment"],
-            "Key Phrases": text_result["phrases"],
-            "Entities": text_result["entities"],
-            "Entities Link": text_result["entities_link"]
-        }
-
-        return jsonify(response)
+            return jsonify(response), 200
+    except:
+        return jsonify({"error": "Internal error"}), 500
 
 @app.route("/question-answering-form", methods = ["GET"])
 def question_answering_form():

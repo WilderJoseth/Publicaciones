@@ -19,59 +19,195 @@
 </style>
 <div class="container">
     <h1 class="text-center">Text analysis</h1>
-
-    <!-- Radio Buttons for Options -->
-    <div class="form-check">
-      <input class="form-check-input" type="radio" name="option" id="fileOption" value="file" checked>
-      <label class="form-check-label" for="fileOption">
-        Upload Files
-      </label>
-    </div>
-    <div class="form-check">
-      <input class="form-check-input" type="radio" name="option" id="textOption" value="text">
-      <label class="form-check-label" for="textOption">
-        Write Text
-      </label>
-    </div>
-
-    <!-- File Upload and Text Input Areas -->
-    <div id="fileUploadArea" class="mt-3">
-      <input type="file" class="form-control-file" id="fileInput">
-      <div class="invalid-feedback">Please upload a file.</div>
-    </div>
-    <div id="textInputArea" class="mt-3" style="display: none;">
-      <textarea class="form-control" id="textInput" rows="5" placeholder="Write your text here..."></textarea>
-      <div class="invalid-feedback">Please write at least four words.</div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="mt-3">
-      <button type="button" class="btn btn-primary" id="submitButton">Submit</button>
-      <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
-      <a href="/" class="btn btn-success" id="linkButton">Go to Index</a>
-    </div>
+    <form id="uploadForm" enctype="multipart/form-data" class="mb-4">
+        <div class="form-group">
+            <!-- Radio Buttons for Options -->
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="option" id="fileOption" value="file" checked>
+                <label class="form-check-label" for="fileOption">
+                  Upload Files
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="option" id="textOption" value="text">
+                <label class="form-check-label" for="textOption">
+                  Write Text
+                </label>
+            </div>
+            <div class="invalid-feedback" id="optionError">Please select an option.</div>
+        </div>
+        <div class="form-group">
+            <!-- File Upload and Text Input Areas -->
+            <div id="fileUploadArea" class="mt-3">
+                <input type="file" class="form-control-file" id="fileInput">
+                <div class="invalid-feedback">Please upload a file.</div>
+            </div>
+            <div id="textInputArea" class="mt-3" style="display: none;">
+                <textarea class="form-control" id="textInput" rows="5" placeholder="Write your text here..."></textarea>
+                <div class="invalid-feedback">Please write at least four words.</div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+        <button type="button" class="btn btn-secondary" id="clearButton">Clear</button>
+        <a href="/" class="btn btn-success" id="linkButton">Go to Index</a>
+    </form>
 
     <!-- Server Response Area -->
     <div id="responseContainer" class="response-container">
       <!-- Server response will be displayed here -->
     </div>
-  </div>
+</div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+<!-- Modal -->
+<div class="modal fade" id="loadingModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-body text-center">
-          <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p>Please wait...</p>
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div>
+                <p>Please wait...</p>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
 <script>
+    // When the form is submitted
+    document.getElementById('uploadForm').onsubmit = async function(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+        
+        // Get elements
+        let loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        let fileOption = document.getElementById('fileOption');
+        //const textOption = document.getElementById('textOption');
+        let fileInput = document.getElementById('fileInput');
+        let textInput = document.getElementById('textInput');
+
+        // Validate if an option is selected
+        let selectedOption = document.querySelector('input[name="option"]:checked');
+        if (!selectedOption) {
+            document.getElementById('optionError').style.display = 'block';
+            return;
+        } 
+        else {
+            document.getElementById('optionError').style.display = 'none';
+        }
+
+        if (fileOption.checked) {
+            // Validate if a fileInput is selected
+            if (fileInput.files.length === 0) {
+                fileInput.classList.add('is-invalid');
+                return;
+            } 
+            else {
+                fileInput.classList.remove('is-invalid');
+            }
+        }
+        else {
+            // Validate input text
+            let text = textInput.value.trim();
+            if (text.split(/\s+/).length < 4) {
+                textInput.classList.add('is-invalid');
+                return;
+            } 
+            else {
+                textInput.classList.remove('is-invalid');
+            }
+        }
+
+        try {
+            loadingModal.show();
+
+            // Create a new FormData object
+            let formData = new FormData();
+
+            if (fileOption.checked) {
+                formData.append('file', fileInput.files[0]);
+                formData.append('option', 'File');
+            }
+            else {
+                formData.append('text', textInput.value.trim());
+                formData.append('option', 'Text');
+            }
+
+            // Send the form data to the backend using a POST request
+            let response = await fetch('/text-analysis', {
+                method: 'POST',
+                body: formData
+            });
+            
+            // If the response is OK (status 200)
+            if (response.ok) {
+                // Parse the JSON response
+                let jsonResponse = await response.json();
+
+                // Write results
+                responseContainer.innerHTML = ''; // Clear previous content
+                Object.entries(jsonResponse).forEach(([title, items]) => {
+                    const listContainer = document.createElement('div');
+                    const listTitle = document.createElement('h4');
+                    listTitle.textContent = title;
+                    const list = document.createElement('ul');
+                    items.forEach(item => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = item;
+                        list.appendChild(listItem);
+                    });
+                    listContainer.appendChild(listTitle);
+                    listContainer.appendChild(list);
+                    responseContainer.appendChild(listContainer);
+                });
+            }
+            else {
+                alert('Text processing failed.')
+            }
+        }
+        catch (e) {
+            alert(e)
+        }
+        finally {
+            loadingModal.hide();
+        }
+    };
+
+    // When the file option is selected
+    document.getElementById('fileOption').onchange = function() {
+        let fileUploadArea = document.getElementById('fileUploadArea');
+        let textInputArea = document.getElementById('textInputArea');
+        
+        fileUploadArea.style.display = 'block';
+        textInputArea.style.display = 'none';
+    };
+
+    // When the text option is selected
+    document.getElementById('textOption').onchange = function() {
+        let fileUploadArea = document.getElementById('fileUploadArea');
+        let textInputArea = document.getElementById('textInputArea');
+        
+        fileUploadArea.style.display = 'none';
+        textInputArea.style.display = 'block';
+    };
+
+    // When the clear button is clicked
+    document.getElementById('clearButton').onclick = function() {
+        // Clear the file input
+        let fileInput = document.getElementById('fileInput');
+        fileInput.value = '';
+        fileInput.classList.remove('is-invalid');
+
+        // Clear text input
+        let textInput = document.getElementById('textInput');
+        textInput.value = '';
+        textInput.classList.remove('is-invalid');
+
+        // Clear response output
+        let responseContainer = document.getElementById('responseContainer');
+        responseContainer.innerHTML = '';
+    };
+
+    /*
     document.addEventListener('DOMContentLoaded', () => {
         const fileOption = document.getElementById('fileOption');
         const textOption = document.getElementById('textOption');
@@ -173,5 +309,6 @@
             responseContainer.innerHTML = '';
         });
     });
+    */
 </script>
 {% endblock %}
