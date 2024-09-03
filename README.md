@@ -41,3 +41,9 @@ These services have been implemented using a web site using Flask.
 ##### 1.2.2.1. Tabular
 
 * **Wholesale customers**: Kaggle project.
+
+## 2. Data Engineering
+
+### 2.1. Power BI
+
+* **Adult income**: EDA Report.
