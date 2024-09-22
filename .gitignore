@@ -5,3 +5,7 @@ DataScience/AI Services/Azure Fundamentals PreTrained Models/main/__pycache__
 DataScience/AI Services/Azure Fundamentals PreTrained Models/data
 DataScience/AI Services/Azure Fundamentals PreTrained Models/main/.env
 ################# End AI Services - Azure Fundamentals PreTrained Models #################
+
+################# Start Machine Learning - Adult Income #################
+DataScience/Machine Learning/Supervised/Classification/Tabular/Adult Income/.env
+################# End Machine Learning - Adult Income #################
