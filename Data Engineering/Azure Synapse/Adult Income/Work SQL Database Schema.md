@@ -28,9 +28,9 @@ Link: <https://www.kaggle.com/datasets/wenruliu/adult-income-dataset>
 
 Upload file to blob storage
 
-![Storage](img/azure_blob_storage.png)
+![Storage](img/sql_azure_blob_storage.png)
 
-![Storage](img/synapse_storage_link.png)
+![Storage](img/sql_synapse_storage_link.png)
 
 ```SQL
 SELECT TOP 100 *
@@ -71,7 +71,7 @@ CREATE EXTERNAL FILE FORMAT ParquetFormat
 GO;
 ```
 
-![Storage](img/synapse_database.png)
+![Storage](img/sql_synapse_database.png)
 
 ## Create tables schema
 
@@ -282,7 +282,7 @@ FROM (
 GO
 ```
 
-![Storage](img/synapse_table_directories.png)
+![Storage](img/sql_synapse_table_directories.png)
 
 ## Query data
 
@@ -309,4 +309,4 @@ GO;
 EXEC usp_GetPeopleInformation;
 ```
 
-![Storage](img/synapse_stored_usp_GetPeopleInformation.png)
+![Storage](img/sql_synapse_stored_usp_GetPeopleInformation.png)
