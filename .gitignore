@@ -1,11 +1,16 @@
 
 ################# Start AI Services - Azure Fundamentals PreTrained Models #################
-Data Science/AI Services/Azure Fundamentals PreTrained Models/entities/__pycache__
-Data Science/AI Services/Azure Fundamentals PreTrained Models/main/__pycache__
-Data Science/AI Services/Azure Fundamentals PreTrained Models/data
-Data Science/AI Services/Azure Fundamentals PreTrained Models/main/.env
+Data_Science/AI_Services/Azure_Fundamentals_PreTrained_Models/entities/__pycache__
+Data_Science/AI_Services/Azure_Fundamentals_PreTrained_Models/main/__pycache__
+Data_Science/AI_Services/Azure_Fundamentals_PreTrained_Models/data
+Data_Science/AI_Services/Azure_Fundamentals_PreTrained_Models/main/.env
 ################# End AI Services - Azure Fundamentals PreTrained Models #################
 
 ################# Start Machine Learning - Adult Income #################
-Data Science/Machine Learning/Supervised/Classification/Tabular/Adult Income/.env
+Data_Science/Machine_Learning/Supervised/Classification/Tabular/Adult_Income/.env
+Data_Science/Machine_Learning/Supervised/Classification/Tabular/Road_Accident_Survival/src
+
+Data_Science/Machine_Learning/Supervised/Regression/Tabular/Pakistan_Used_Car_Prices_2023/.env
+
+Data_Science/Machine_Learning/Time_Series
 ################# End Machine Learning - Adult Income #################
