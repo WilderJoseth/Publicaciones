@@ -8,7 +8,7 @@ This repository focuses on posting programing projects in order to be used as a 
 
 #### 1.1.1. Azure Fundamentals PreTrained Models
 
-This project focuses on implementing AI services using pre-trained models like:
+This project focuses on implementing Azure AI services using pre-trained models like:
 
 * Vision services.
 * Text analysis services.

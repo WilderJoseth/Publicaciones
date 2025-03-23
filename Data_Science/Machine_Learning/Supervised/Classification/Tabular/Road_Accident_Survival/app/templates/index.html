@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Road Accident Survival Prediction</h1>
+    <form id="accident_form" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+            <label for="age" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age" aria-describedby="emailHelp" required>
+        </div>
+        <div class="mb-3">
+            <label for="speed_of_impact" class="form-label" type="number">Speed of Impact</label>
+            <input type="number" class="form-control" id="speed_of_impact" aria-describedby="emailHelp" required>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-control" id="gender" aria-label="Default select" required>
+                <option value="" selected>Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="helmet_used">
+            <label class="form-check-label" for="helmet_used">Helmet Used</label>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="seatbelt_used">
+            <label class="form-check-label" for="seatbelt_used">Seatbelt Used</label>
+        </div>
+        <div class="mb-3" id="text_survive">
+        </div>
+        <button type="submit" class="btn btn-primary">Predict</button>
+        <button type="button" id="clearButton" class="btn btn-secondary">Clear</button>
+    </form>
+
+    <!-- Modal for loading overlay -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">Processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // When the form is submitted
+    document.getElementById("accident_form").onsubmit = async function(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+        
+        // Get modal element
+        let loadingModal = new bootstrap.Modal(document.getElementById("loadingModal"));
+
+        // Show loading modal
+        //$('#loadingModal').modal('show');
+
+        // Validate if an option is selected
+        let age = document.getElementById("age").value;
+        let speed_of_impact = document.getElementById("speed_of_impact").value;
+        let gender = document.getElementById("gender").value;
+        let helmet_used = document.getElementById("helmet_used").checked;
+        let seatbelt_used = document.getElementById("seatbelt_used").checked;
+        // let survived = document.getElementById("survived").checked;
+
+        // Call backend
+        try {
+            loadingModal.show();
+
+            // Create a new FormData object
+            let formData = new FormData();
+            
+            // Append the selected radio button value
+            formData.append("Age", age);
+            formData.append("Speed_of_Impact", speed_of_impact);
+            formData.append("Gender", gender);
+            formData.append("Helmet_Used", helmet_used);
+            formData.append("Seatbelt_Used", seatbelt_used);
+            // formData.append("survived", survived);
+
+            // Send the form data to the backend using a POST request
+            let response = await fetch("http://localhost:5001/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            // If the response is OK (status 200)
+            if (response.ok) {
+                // Parse the JSON response
+                
+                let jsonResponse = await response.json();
+                let text_survive = jsonResponse.text_survive
+                let textDiv = document.getElementById("text_survive");
+                textDiv.innerHTML = "<h4>" + text_survive + "</h4>"
+            } 
+            else {
+                // If there was an error
+                alert("Processing failed");
+            }
+        }
+        catch (e) {
+            alert(e)
+        }
+        finally{
+            loadingModal.hide();
+        }
+
+        // Hide loading modal regardless of response status
+        //$('#loadingModal').modal('hide');
+    };
+
+    // When the clear button is clicked
+    document.getElementById("clearButton").onclick = function() {
+        let age = document.getElementById("age");
+        age.value = "";
+
+        let speed_of_impact = document.getElementById("speed_of_impact");
+        speed_of_impact.value = "";
+
+        let gender = document.getElementById("gender");
+        gender.value = "";
+
+        let text_survive = document.getElementById("text_survive");
+        text_survive.innerHTML = "";
+
+        document.getElementById("helmet_used").checked = false;
+
+        document.getElementById("seatbelt_used").checked = false;
+    };
+</script>
+{% endblock %}
